@@ -3,6 +3,8 @@ This is a calendar web app that allows users to signup and login to their own ca
 
 This project was a group project implemented by Nana Owusu (nosusu@wustl.edu) and I.
 
+Accessable at: http://ec2-54-148-70-188.us-west-2.compute.amazonaws.com/calendar/calendar.html
+
 //For database creation description and other host specific definitions
 
 Database schema
