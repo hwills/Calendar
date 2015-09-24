@@ -1,0 +1,184 @@
+
+#todayButton{
+
+	float: right;
+
+}
+
+#weekButton{
+
+	float: right;
+
+}
+
+.highlight{
+
+	background-color: #FF3300;
+	font-color: #ffffff;
+
+}
+
+.ctrl-btns{
+
+	font-size: 3em;
+
+	
+	/*border: 1px solid black;*/
+}
+
+#month-title-bar{
+
+	width: 100%;
+	white-space: nowrap !important;
+	/*border:1px solid red;*/
+	
+
+}
+
+.logout_id{
+	position:inherit;
+}
+
+.adddddd{
+	position:fixed;
+}
+
+.fixed{
+	position:fixed;
+	top:0px;
+}
+
+#table-options-header.fixed{
+	left: 200px;
+}
+
+.alert-primary{
+
+	color: #ffffff;
+	background-color: #0066ff !important;
+	border-color: #0033cc;
+}
+
+
+.month-title-bar-element{
+
+	position: inherit;
+	/*border:1px dashed green;*/
+	white-space: normal !important;
+	display:inline-block;
+
+}
+
+.btn-group{
+	position: inherit;
+}
+
+th{
+	font-family: Century Gothic, sans-serif;
+	font-size: 1.5em;
+	overflow: hidden;
+
+}
+
+th, td{
+	width: 130px;
+	
+}
+
+.no-date{
+	background-color: #dadada;
+}
+
+td {
+
+	vertical-align: top;
+	height: 100px;
+	
+	padding: 10px;
+	font-size: 0.9em;
+}
+
+table{
+
+	table-layout: fixed;
+	width:100%;
+}
+
+#Year{
+	width: 50px;
+}
+
+#Day{
+	width: 40px;
+}
+
+#MonthName{
+
+	width: 85% !important;
+	display: inline-block;
+	font-size: 3em;
+}
+
+.alert{
+	font-size: 1em !important;
+}
+
+.event-element-class textarea{
+	width: inherit;
+}
+
+header{
+	text-align: center;
+	font-size: 3em;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-bottom: 15px;
+	/*border: 2px dashed black;*/
+}
+
+#show-event-dialog{
+
+	z-index: 5;
+	/*border: 2px dashed black;*/
+	
+	display:inline-block;
+}
+
+#sidebar {
+	border: 2px solid black;
+	width: 20%;
+	display:none;
+	margin-left: -20px;
+	/*float: left;*/
+	white-space: normal;
+}
+
+.control-buttons {
+	display: inline;
+}
+
+#navbar {
+	/*float: right;*/
+	display:inline-block;
+	/*border: 1px dashed green;*/
+	width:20%;
+	white-space: normal;
+}
+
+#logout-box{
+	border: 1px dashed brown;
+}
+
+#cal-container {
+	display:inline-block;
+	width: 70% !important;
+	margin: auto;
+	border: 2px solid white;
+	white-space: normal;
+}
+
+#page {
+	/*border: 2px solid pink;*/
+	white-space: nowrap;
+	font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
+}

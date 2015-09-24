@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head><title>My Calendar</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+
+<!-- Jquery -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<!-- Bootstrap -->
+<link href="bootstrap3/css/bootstrap.css" rel="stylesheet" media="screen">
+<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet" media="screen">
+<link href="bootstrap3/css/bootstrap-theme.css" rel="stylesheet" media="screen">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="cal.css" type="text/css"/>
+
+</head>
+
+<body>
+	
+<header>
+	Hunter and Nana's Calendar!! Wooot!!
+</header>
+
+
+<div id = "page" class = "container-fluid">
+
+	<div id = "show-event-dialog">
+		<button type = "button" class="btn btn-success" data-toggle="popover" tabindex="0" data-placement = "right" title="Add an event..." data-content="" id = "adddddd"><span class = "glyphicon glyphicon-plus ctrl-btns"></span></button>
+		<button type = "button" class="btn btn-warning" id = "logout_id" ><span class = "glyphicon glyphicon-off ctrl-btns"></span></button>
+	</div>
+	
+	<div id = "sidebar" class = "pull-left">
+		
+		<!-- buttons and options go here-->
+
+		<label>Event: </label><textarea id="Event" placeholder = "Event Description"></textarea>
+
+		<label>Category: </label><select id="Category">
+		<option> General </option>
+		<option> Home </option>
+		<option> Work </option>
+		<option> School </option>
+		<option> Birthdays </option>
+		<option> Play </option>
+		</select>
+
+		<label>Month: </label><select id="Month" onchange='updateSelectedMonth(); updateDaySelect();'>
+		</select>
+
+		<label>Year: </label><input type="number" min="0" step="1" value="2015" id="Year" onchange='updateSelectedMonth(); updateDaySelect();'>
+
+		<label>Day: </label><input type="number" min="1" max="7" step="1" value="1" id="Day">
+
+		<label>Time: </label><select id="Time">
+		</select>
+
+		<button id="addEvent" class = "btn btn-primary">Submit Event</button>
+	</div>
+
+	<div id = "cal-container">
+		<div id = "table-options-header">
+			<div id = "month-title-bar" class = "text-center">
+				<div class = "month-title-bar-element"><span class = "glyphicon glyphicon-chevron-left ctrl-btns" id = "PrevMonth" ></span></div>
+				<div class = "month-title-bar-element" id = "MonthName" ><h1>  Month </h1></div>
+				<div class = "month-title-bar-element "><span class = "glyphicon glyphicon-chevron-right ctrl-btns" id="NextMonth" ></span></div>
+			</div>
+
+
+			<div class="btn-group" data-toggle="buttons">
+				<label class="btn btn-default active" id="DisplayGeneral">
+				    <input type="checkbox" checked> <span class = "glyphicon glyphicon-check"></span> General
+				</label>
+				<label class="btn btn-primary active" id="DisplayHome">
+				    <input type="checkbox" checked> <span class = "glyphicon glyphicon-check"></span> Home
+				</label>
+				<label class="btn btn-success active" id="DisplayWork">
+				    <input type="checkbox" checked><span class = "glyphicon glyphicon-check" ></span> Work
+				</label>
+				<label class="btn btn-info active" id="DisplayPlay">
+				    <input type="checkbox" checked> <span class = "glyphicon glyphicon-check" ></span> Play
+				</label>
+				<label class="btn btn-warning active" id="DisplayBirthdays">
+				    <input type="checkbox" checked> <span class = "glyphicon glyphicon-check" ></span> Birthdays
+				</label>
+				<label class="btn btn-danger active" id="DisplaySchool">
+				    <input type="checkbox" checked><span class = "glyphicon glyphicon-check" ></span> School
+				</label>
+			</div>
+			
+			<div id="weekButton" data-toggle="buttons">
+				<label class="btn btn-success active" id="WeekView">
+				    <input type="checkbox"> Week View
+				</label>
+			</div>
+	
+			<div id="todayButton" data-toggle="buttons">
+				<label class="btn btn-danger active" id="Today">
+				    <input type="checkbox"> Today
+				</label>
+			</div>
+		</div>
+		<table id="dates" class = "table" border="1">
+			<tr>
+				<th>
+				Sunday
+				</th>
+				<th>
+				Monday
+				</th>
+				<th>
+				Tuesday
+				</th>
+				<th>
+				Wednesday
+				</th>
+				<th>
+				Thursday
+				</th>
+				<th>
+				Friday
+				</th>
+				<th>
+				Saturday
+				</th>
+			</tr>
+		</table>
+	</div>
+
+	<div id = "navbar" class="pull-right">
+		<div id = "login-box" class = "form-inline">
+			<div class = "form-group">
+		    <label for="username"><span class = "glyphicon glyphicon-user"></span><strong> Username </strong></label>
+		    <input type="text" id = "username" placeholder = "Enter username" required>
+			</div>
+			<div class = "form-group">
+		    <label  for="password"><span class = "glyphicon glyphicon-asterisk"></span><strong> Password</strong></label>
+		    <input type="password" id = "password"  placeholder = "Password" required>
+		    <div class = "form-group">
+		    <button id = "login_id" class = "btn btn-default">
+		    	LOGIN
+		    </button>
+		    <button id = "sign_id" class = "btn btn-default">
+		    SIGN UP </button>
+		   
+		   <p id = "login-error" style = "display: none"></p>
+		</div>
+
+	</div>
+
+</div>
+</div>
+	
+</div>
+<script src="calendarHelper.js"></script>
+<script src="login.js" ></script>
+<script src = "bootstrap3/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+
+var inWeekView = false;
+var current_user = "";//initialize no current user
+var token;//CSRF token set at login and unset at logout
+var useGeneral = true;//tells us whether or not to display General tag
+var useHome = true;//tells us whether or not to display Home tag
+var useWork = true;//tells us whether or not to display Work tag
+var useSchool = true;//tells us whether or not to display School tag
+var useBirthdays = true;//tells us whether or not to display Birthdays tag
+var usePlay = true;//tells us whether or not to display Play tag
+$("#logout_id").hide();
+var colors = ['default', 'primary', 'success', 'info', 'warning', 'danger'];
+var cats = ['General', 'Home', 'Work', 'Play', 'Birthdays', 'School'];
+var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function getColor(cat_name){
+
+	if (cat_name === "Home"){
+		//alert(cat_name);
+	}
+	var i;
+	for (i = 0; i < cats.length; i++){
+		if (cat_name === "Home"){
+			//alert("matching " +  cats[i]);
+		}
+		
+		if (cats[i] === cat_name){
+			if (cat_name === "Home"){
+				//alert("match found for:" + cats[i]);
+				//alert("returning: " + colors[i]);
+			}
+
+			return colors[i];
+		}
+	}
+	return "no-color";
+
+}
+
+var selectedMonth = new Month(2015, 0);
+
+//setting up select input element for choosing the month of the event
+for(var i = 0; i < months.length; i++){
+	var opt = document.createElement("option");
+	opt.appendChild(document.createTextNode(months[i]));
+	opt.setAttribute("value", i);
+	document.getElementById("Month").appendChild(opt);
+}
+
+//setting up the select input element for choosing the time of the event
+for(var j = 0; j <= 23; j++){
+	for(var i = 0; i <= 30; i+=30){
+		var opt = document.createElement("option");
+		var jj = "" + j;
+		var ii = "" + i;
+		if(i===0){ii+="0";}
+		if(j<10){jj="0"+jj;}
+		opt.appendChild(document.createTextNode(jj + ":" + ii));
+		opt.setAttribute("value", (jj + ":" + ii));
+		document.getElementById("Time").appendChild(opt);
+	}
+}
+//initialize chosen event month to January
+document.getElementById("Month").value = 0;
+
+
+function updateSelectedMonth(){
+	//saves the current chosen event month
+	var y = document.getElementById("Year").value;
+	var m = document.getElementById("Month").value;
+	selectedMonth = new Month(Number(y), Number(m));
+}
+
+function updateDaySelect(){
+	//ensures the right number of days in the chosen month
+	var numDays = selectedMonth.nextMonth().getDateObject(0).getDate();
+	var day = document.getElementById("Day");
+	day.max = (numDays);
+}
+updateSelectedMonth();
+updateDaySelect();
+
+var current_date = new Date();
+var currentMonth = new Month(current_date.getFullYear(), current_date.getMonth()); //get current year and month
+var currentWeek = new Week(currentMonth.getDateObject()); //get current week
+//var currentMonth = new Month(2015, 2);
+
+function getMonthStartDay(){
+	//get the first day of the current month
+	return currentMonth.getDateObject(1).getDay();
+}
+function removeDates(){
+	//removes date cells from calendar table
+	var weeks = document.getElementById("dates").getElementsByClassName("week");
+	var len = weeks.length;
+	for(var i = 0; i < len; i++){
+		document.getElementById("dates").removeChild(weeks[0]);
+	}
+}
+function getDaysInMonth(){
+	//gets the number of days in the month
+	return currentMonth.nextMonth().getDateObject(0).getDate();
+}
+
+function addToWeekCalendar(crntEvent){
+	//adds events for a whole week
+	var newTr = document.createElement("tr");
+	newTr.setAttribute("class", "week");
+	var jsondata = JSON.parse(crntEvent);
+	var days = currentWeek.getDates();
+	for(var i = 0; i < 7; i++){
+		var day = days[i].getDate();
+		var events = eventsOnDay(day, jsondata);
+		var eventIds = eventIdsOnDay(day, jsondata);
+		var newTd = document.createElement("td");
+		var date_number = document.createElement("h3");	
+		date_number.innerHTML = "" + (day);
+		newTd.appendChild(date_number);
+		newTd.id = (day);
+
+
+		newTd.appendChild(document.createElement("br"));
+		for(var j = 0; j < events.length; j++){
+			//adding events for a particular date
+			var event_color = getColor(events[j][0]);
+			var eventDiv = document.createElement("div");
+			eventDiv.setAttribute("class", "alert alert-" + event_color);
+			var eventTagDiv = document.createElement("div");
+			var eventTimeDiv = document.createElement("div");
+			var eventTextDiv = document.createElement("div");
+			var tagIcon = document.createElement("span");
+			tagIcon.setAttribute("class", "glyphicon glyphicon-tag");
+			var tagItself = document.createTextNode(" " + events[j][0]);
+			eventTagDiv.setAttribute("class", "tag");
+			eventTimeDiv.setAttribute("class", "time");
+			eventTextDiv.setAttribute("class", "text");
+			eventTimeDiv.innerHTML = events[j][1];
+
+			eventTextDiv.innerHTML = events[j][2];
+			eventTagDiv.appendChild(tagIcon);
+			eventTagDiv.appendChild(tagItself);
+			
+			eventDiv.appendChild(eventTimeDiv);
+			eventDiv.appendChild(eventTextDiv);
+			eventDiv.appendChild(eventTagDiv);
+			eventDiv.id = eventIds[j];
+			$(eventDiv).one("click",editEvent.bind(eventDiv));
+			newTd.appendChild(eventDiv);
+			newTd.appendChild(document.createElement("br"));
+		}	
+		newTr.appendChild(newTd);
+	}
+	document.getElementById("dates").appendChild(newTr);
+}
+function addToCalendar(crntEvent){
+	//adds events for a whole month
+	var newTr = document.createElement("tr");
+	newTr.setAttribute("class", "week");
+	var trIndex = 0;
+	var jsondata = JSON.parse(crntEvent);
+	var startDay = getMonthStartDay();
+	var i;
+	var newTd;
+	for(i = 0; i < startDay; i++){
+		newTd = document.createElement("td");
+		newTd.setAttribute("class", "no-date");
+		newTd.appendChild(document.createTextNode(" "));
+		newTr.appendChild(newTd);
+		trIndex++;
+	}
+	for(i=0;i<getDaysInMonth();i++){
+		if(trIndex===0){
+			newTr = document.createElement("tr");
+			newTr.setAttribute("class", "week");
+		}
+		var events = eventsOnDay(i+1, jsondata);
+		var eventIds = eventIdsOnDay(i+1, jsondata);
+		newTd = document.createElement("td");
+		var date_number = document.createElement("h3");	
+		date_number.innerHTML = "" + (i+1);
+		newTd.appendChild(date_number);
+		newTd.id = (i+1);
+
+
+		newTd.appendChild(document.createElement("br"));
+		for(var j = 0; j < events.length; j++){
+			//adding events for a particular date
+			var event_color = getColor(events[j][0]);
+			var eventDiv = document.createElement("div");
+			eventDiv.setAttribute("class", "alert alert-" + event_color);
+			var eventTagDiv = document.createElement("div");
+			var eventTimeDiv = document.createElement("div");
+			var eventTextDiv = document.createElement("div");
+			var tagIcon = document.createElement("span");
+			tagIcon.setAttribute("class", "glyphicon glyphicon-tag");
+			var tagItself = document.createTextNode(" " + events[j][0]);
+			eventTagDiv.setAttribute("class", "tag");
+			eventTimeDiv.setAttribute("class", "time");
+			eventTextDiv.setAttribute("class", "text");
+			eventTimeDiv.innerHTML = events[j][1];
+
+			eventTextDiv.innerHTML = events[j][2];
+			eventTagDiv.appendChild(tagIcon);
+			eventTagDiv.appendChild(tagItself);
+			
+			eventDiv.appendChild(eventTimeDiv);
+			eventDiv.appendChild(eventTextDiv);
+			eventDiv.appendChild(eventTagDiv);
+			eventDiv.id = eventIds[j];
+			$(eventDiv).one("click",editEvent.bind(eventDiv));
+			newTd.appendChild(eventDiv);
+			newTd.appendChild(document.createElement("br"));
+		}	
+		newTr.appendChild(newTd);
+		trIndex=(trIndex+1)%7;
+		if(i==getDaysInMonth()-1){
+			for(;trIndex !== 0; trIndex=(trIndex+1)%7){
+				var newTd2 = document.createElement("td");
+				newTd2.setAttribute("class", "no-date");
+				newTd2.appendChild(document.createTextNode(" "));
+				newTr.appendChild(newTd2);
+			}
+		}
+		if(trIndex===0){
+			document.getElementById("dates").appendChild(newTr);
+		}
+	}
+}
+
+function editEvent(){
+	this.childNodes[0].hidden = true;
+	this.childNodes[1].hidden = true;
+	this.childNodes[2].hidden = true;
+	var oldTime = this.childNodes[0].innerHTML;
+	var oldEvent = this.childNodes[1].innerHTML;
+	var oldTag = this.childNodes[2].childNodes[1];
+	var tag = document.createElement("select");
+	var genOpt = document.createElement("option");
+	genOpt.value = "General";
+	genOpt.appendChild(document.createTextNode("General"));
+	tag.appendChild(genOpt);
+	var homeOpt = document.createElement("option");
+	homeOpt.value = "Home";
+	homeOpt.appendChild(document.createTextNode("Home"));
+	tag.appendChild(homeOpt);
+	var workOpt = document.createElement("option");
+	workOpt.value = "Work";
+	workOpt.appendChild(document.createTextNode("Work"));
+	tag.appendChild(workOpt);
+	var schoolOpt = document.createElement("option");
+	schoolOpt.value = "School";
+	schoolOpt.appendChild(document.createTextNode("School"));
+	tag.appendChild(schoolOpt);
+	var birthOpt = document.createElement("option");
+	birthOpt.value = "Birthdays";
+	birthOpt.appendChild(document.createTextNode("Birthdays"));
+	tag.appendChild(birthOpt);
+	var playOpt = document.createElement("option");
+	playOpt.value = "Play";
+	playOpt.appendChild(document.createTextNode("Play"));
+	tag.appendChild(playOpt);
+	tag.value = oldTag;
+	this.appendChild(tag);
+	var timer = document.createElement("select");
+	for(var j = 0; j <= 23; j++){
+		for(var i = 0; i <= 30; i+=30){
+			var opt = document.createElement("option");
+			var jj = "" + j;
+			var ii = "" + i;
+			if(i===0){ii+="0";}
+			if(j<10){jj="0"+jj;}
+			var time = jj + ":" + ii;
+			if(time==oldTime){
+				opt.selected = true;
+			}
+			opt.appendChild(document.createTextNode(time));
+			opt.setAttribute("value", (jj + ":" + ii));
+			timer.appendChild(opt);
+		}
+	}
+	this.appendChild(timer);
+	var newEvent = document.createElement("textarea");
+	newEvent.value = oldEvent;
+	this.appendChild(newEvent);
+	var deleteButton = document.createElement("span");
+	deleteButton.setAttribute("class", "glyphicon glyphicon-remove-sign");
+	var editButton = document.createElement("span");
+	editButton.setAttribute("class", "glyphicon glyphicon-edit");
+	deleteButton.addEventListener("click", deleteEvent.bind(this), false);
+	editButton.addEventListener("click", confirmEdit.bind(this), false);
+	this.appendChild(deleteButton);
+	this.appendChild(editButton);
+}
+
+function deleteEvent(){
+	var id = this.id;
+	$.ajax({url:"db_delete.php",type:"POST",data:{"id":id, "token":token}});
+	setTimeout(function(){
+		if(inWeekView){
+			removeDates();
+			displayWeekDates();
+			updateWeek();
+		}
+		else{
+			removeDates();
+			displayDates();
+			updateMonth();
+		}
+	},500);
+}
+
+function confirmEdit(){
+	var id = this.id;
+	var eventText = this.childNodes[5].value;
+	var time = this.childNodes[4].value;
+	var tag = this.childNodes[3].value;
+	$.ajax({url:"db_edit.php",type:"POST",data:{"id":id, "tag":tag, "eventText":eventText, "time":time, "token":token}});
+	setTimeout(function(){
+		if(inWeekView){
+			removeDates();
+			displayWeekDates();
+			updateWeek();
+		}
+		else{
+			removeDates();
+			displayDates();
+			updateMonth();
+		}
+	},500);
+}
+
+function eventsOnDay(day, jsondata){
+	//returns an array of events for a day in the month
+	var maxindex = jsondata.maxindex;
+	var arr = [];
+	for(var i=0;i<maxindex;i++){
+		var tag = jsondata[i].tag;
+		if(jsondata[i].day == day && ((tag=="General" && useGeneral) || (tag=="Home" && useHome) || (tag=="Work" && useWork) || (tag=="School" && useSchool) || (tag=="Play" && usePlay) || (tag=="Birthdays" && useBirthdays))){
+			var subarr = [];
+			subarr.push(jsondata[i].tag);
+			subarr.push(jsondata[i].time);
+			subarr.push(jsondata[i].event);
+			arr.push(subarr);
+		}
+	}
+	return arr;
+}
+function eventIdsOnDay(day, jsondata){
+	//returns an array of events for a day in the month
+	var maxindex = jsondata.maxindex;
+	var arr = [];
+	for(var i=0;i<maxindex;i++){
+		var tag = jsondata[i].tag;
+		if(jsondata[i].day == day && ((tag=="General" && useGeneral) || (tag=="Home" && useHome) || (tag=="Work" && useWork) || (tag=="School" && useSchool) || (tag=="Play" && usePlay) || (tag=="Birthdays" && useBirthdays))){
+			arr.push(jsondata[i].id);
+		}
+	}
+	return arr;
+}
+function displayDates(){//This displays all of the events for the current month on the calendar
+	getEvent(currentMonth.month, currentMonth.year);
+}
+function displayWeekDates(){//This displays all of the events for the current week on the calendar
+	getWeekEvent();	
+}
+displayDates();
+function updateMonth(){
+	//updates month name being displayed as current month in the side bar
+	inWeekView = false;
+	var monthName = months[currentMonth.month];
+	document.getElementById("MonthName").textContent = monthName + ", " + currentMonth.year;
+}
+function updateWeek(){
+	//updates month name being displayed as current month in the side bar
+	inWeekView = true;
+	var weekFirstDay = currentWeek.getDates()[0];
+	var weekLastDay = currentWeek.getDates()[6];
+	document.getElementById("MonthName").textContent = months[weekFirstDay.getMonth()] + " " + weekFirstDay.getDate() + " - " + months[weekLastDay.getMonth()] + " " + weekLastDay.getDate();
+}
+function getEvent(month,year){
+	//get events for a whole month for a particular user
+	var xmlHttp = new XMLHttpRequest();
+	var u = current_user;
+	xmlHttp.open("POST", "db_retreive.php", true);
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlHttp.addEventListener("load", ajaxCallback, false);
+	xmlHttp.send("month=" + months[month] + "&year=" + year + "&username=" + u + "&token=" + token);
+}
+function getWeekEvent(){
+	//get events for a full week for a particular user
+	var weekFirstDay = currentWeek.getDates()[0];
+	var weekLastDay = currentWeek.getDates()[6];
+	var month_one = weekFirstDay.getMonth();
+	var year_one = weekFirstDay.getFullYear();
+	var month_two = weekLastDay.getMonth();
+	var year_two = weekLastDay.getFullYear();
+	var xmlHttp = new XMLHttpRequest();
+	var u = current_user;
+	xmlHttp.open("POST", "db_week_retreive.php", true);
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlHttp.addEventListener("load", ajaxWeekCallback, false);
+	xmlHttp.send("month_one=" + months[month_one] + "&year_one=" + year_one + "&month_two=" + months[month_two] + "&year_two=" + year_two+ "&username=" + u + "&token=" + token);
+}
+function addEvent(){
+	//input an event for a particular date and user into the database
+	var xmlHttp = new XMLHttpRequest();
+	var e = document.getElementById("Event").value;
+	var m = document.getElementById("Month").value;
+	var y = document.getElementById("Year").value;
+	var d = document.getElementById("Day").value;
+	var t = document.getElementById("Time").value;
+	var tag = document.getElementById("Category").value;
+	var u = current_user;
+	xmlHttp.open("POST", "db_input.php", true);
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlHttp.send("event=" + e + "&month=" + months[m] + "&year=" + y + "&day=" + d + "&time=" + t + "&tag=" + tag + "&username=" + u + "&token=" +token);
+}
+function ajaxCallback(event){//callback for retreiving a full month's jsondata
+	var crntEvent = event.target.responseText;
+	if(current_user===""){crntEvent="{\"maxindex\":0}";}
+	addToCalendar(crntEvent);
+}
+function ajaxWeekCallback(event){//callback for retreiving a full week's jsondata
+	var crntEvent = event.target.responseText;
+	if(current_user===""){crntEvent="{\"maxindex\":0}";}
+	addToWeekCalendar(crntEvent);
+}
+updateMonth();
+document.getElementById("PrevMonth").addEventListener("click", function(){
+	if(inWeekView){
+		currentWeek = currentWeek.prevWeek();
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		currentMonth = currentMonth.prevMonth(); // Previous month would be currentMonth.prevMonth()
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+document.getElementById("NextMonth").addEventListener("click", function(){
+	if(inWeekView){
+		currentWeek = currentWeek.nextWeek();
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		currentMonth = currentMonth.nextMonth();
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+var initgen= 'glyphicon-check';
+var newgen = 'glyphicon-unchecked';
+var inithome= 'glyphicon-check';
+var newhome = 'glyphicon-unchecked';
+var initwork= 'glyphicon-check';
+var newwork = 'glyphicon-unchecked';
+var initsch= 'glyphicon-check';
+var newsch = 'glyphicon-unchecked';
+var initplay= 'glyphicon-check';
+var newplay = 'glyphicon-unchecked';
+var initbirth= 'glyphicon-check';
+var newbirth = 'glyphicon-unchecked';
+
+
+document.getElementById("DisplayGeneral").addEventListener("click", function(){
+	$(this).children().switchClass(initgen, newgen, 0);
+	var temp = initgen;
+	initgen = newgen;
+	newgen = temp;
+
+
+	useGeneral = !useGeneral;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("DisplayHome").addEventListener("click", function(){
+	$(this).children().switchClass(inithome, newhome, 0);
+	var temp = inithome;
+	inithome = newhome;
+	newhome = temp;
+
+	useHome = !useHome;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+
+document.getElementById("DisplayWork").addEventListener("click", function(){
+	$(this).children().switchClass(initwork, newwork, 0);
+	var temp = initwork;
+	initwork = newwork;
+	newwork = temp;
+
+	useWork = !useWork;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("DisplaySchool").addEventListener("click", function(){
+	$(this).children().switchClass(initsch, newsch, 0);
+	var temp = initsch;
+	initsch = newsch;
+	newsch = temp;
+
+	useSchool = !useSchool;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("DisplayPlay").addEventListener("click", function(){
+	$(this).children().switchClass(initplay, newplay, 0);
+	var temp = initplay;
+	initplay = newplay;
+	newplay = temp;
+
+	usePlay = !usePlay;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("DisplayBirthdays").addEventListener("click", function(){
+	$(this).children().switchClass(initbirth, newbirth, 0);
+	var temp = initbirth;
+	initbirth = newbirth;
+	newbirth = temp;
+
+	useBirthdays = !useBirthdays;
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("addEvent").addEventListener("click", function(){
+	addEvent();
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+}, false);
+
+document.getElementById("Today").addEventListener("click", function(){
+	var sel = document.getElementById("Today").childNodes[1];
+	currentMonth = new Month(current_date.getFullYear(), current_date.getMonth());
+	currentWeek = new Week(currentMonth.getDateObject(current_date.getDate()));
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+	setTimeout(function(){
+		$('#'+current_date.getDate()).toggleClass("highlight", sel.checked);
+	},200);
+}, false);
+
+document.getElementById("WeekView").addEventListener("click", function(){
+	inWeekView = !inWeekView;
+	if(inWeekView){
+		document.getElementById("WeekView").childNodes[2].textContent = "Month View";
+		removeDates();
+		currentWeek = new Week(currentMonth.getDateObject(1));
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		document.getElementById("WeekView").childNodes[2].textContent = "Week View";
+		removeDates();
+		currentMonth = new Month(currentWeek.sunday.getFullYear(), currentWeek.sunday.getMonth());
+		displayDates();
+		updateMonth();	
+	}
+}, false);
+
+var initial= 'glyphicon-plus';
+var newimg = 'glyphicon-minus';
+
+$('[data-toggle="popover"]').click(function(){
+
+	$(this).children().switchClass(initial, newimg, 500);
+	var temp = initial;
+	initial = newimg;
+	newimg = temp;
+
+});
+
+$('[data-toggle="popover"]').popover({
+	html: true,
+	content: function(){
+		return $("#sidebar").html();
+	}
+
+}).parent().delegate('#addEvent', 'click', function(){
+	//alert("button works!");
+	//console.log($("#Event").val());
+	addEvent();
+	if(inWeekView){
+		removeDates();
+		displayWeekDates();
+		updateWeek();
+	}
+	else{
+		removeDates();
+		displayDates();
+		updateMonth();
+	}
+});
+
+var headertop = $("#table-options-header").offset().top;
+var evntbtns = $("#show-event-dialog").offset().top;
+console.log(headertop);
+
+$(window).scroll(function(){
+
+	var curtop = $(this).scrollTop();
+	if (curtop >= headertop){
+		$("#table-options-header").addClass('fixed');
+	}
+	else{
+		$("#table-options-header").removeClass('fixed');
+	}
+
+	if (curtop >= evntbtns){
+
+		$("#show-event-dialog").addClass('fixed');
+	}
+	else{
+		$("#show-event-dialog").removeClass('fixed');
+	}
+
+
+});
+</script>
+</body>
+</html>
